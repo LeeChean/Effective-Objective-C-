@@ -1,6 +1,10 @@
 ﻿************************
 2015年9月9日09:39:50 
 ************************
+Charpter 1：习惯Objective-C的语法
+
+Item1：了解OC底层的机制
+   OC是C语言的超集，在C的基础上又增加了面向对象的特性。所以很多东西和其他面向对象语言很相似，但有一点很特殊，即OC中使用消息机制来触发函数，而不是传统的函数调用，所以要弄清楚消息机制到底是怎么回事。另外可能还要了解一些关于OC Runtime的知识。
 
 1、Message structure(消息机制)原理是什么，和Function calling(函数调用)有什么区别？为什么要使用消息机制？
    
@@ -10,8 +14,6 @@
 而且执行完消息后，会把消息名和方法地址缓存起来，下次再发送这个消息时便可以直接到缓存中读取，可提高效率。
 
    OC为什么要使用消息机制呢？因为通过消息及消息转发机制可以调用当前类中不存在的方法，很灵活，变相实现了多继承。
-
-
 
 
    要想了解消息机制，首先要清楚OC的运行时机制，可参考官方文档Objective-C Runtime Programming Guide。OC的Runtime目前有两个版本，OC2.0之前用的是Legacy版本，之后用的是Modern版本，新版本自然比旧版本功能更强大。主要了解Modern版本的机制即可。
@@ -24,6 +26,50 @@
 3、Objective-C中SEL和@selector分别表示什么？
    SEL是OC的基本数据类型，用来存储selector数据。@selector是一个方法，可以获取某方法的selector。那么selector到底又是什么东西呢？可以理解为方法的编号，也许是函数地址，总之通过这个selector，运行时可以找到这个方法。
 
-4、如果类A和类B没有继承关系，则在A.h文件中无需写#import "B.h"，只需写@class B；因为前者会把B的所有详细信息都引入，从而使编译的时间很长，而此处只需要告诉编译器类B是存在的就可以了，即后者实现的效果。在A.m中再使用#import "B.h"，因为这里要调用类B，需要B的详细信息。
+
+Item2：尽量少在头文件中引入其他类的头文件
+1、如果类A和类B没有继承关系，则在A.h文件中无需写#import "B.h"，只需写@class B；因为前者会把B的所有详细信息都引入，从而使编译的时间很长，而此处只需要告诉编译器类B是存在的就可以了，即后者实现的效果。在A.m中再使用#import "B.h"，因为这里要调用类B，需要B的详细信息。
    但如果B是A的父类，则必须写#import "B.h"。
    另外如果A要遵守协议C，则还要写#import "C.h"
+   
+
+   
+************************
+2015年9月10日09:36:30
+************************
+
+Item3：最好使用字面量来创建对象
+
+1、首先来总结一下OC中创建对象的方式有哪些，下面以NSString为例：
+   1）NSString *s = @"Hello Objective-C";
+   2) NSString *s = [NSString new]; 或 NSString *s = [[NSString alloc] init];
+   3) NSString *s = [NSString stringWithFormat:@"My age is %d",28];
+   可以看出第一种方式是最经济的，代码少，可读性也好，所以尽量使用方式一。
+   
+2、NSNumber、NSArray、NSDictionary的字面量创建对象方式很类似：
+   NSNumber *number = @1;
+   NSArray *array = @[1,8,6,9,5];
+   NSDictionary *dic = @{@"firstObj":1,@"secondObj":@"Hello Objective-C"};
+   
+   这里额外再说些知识点：
+   首先引入一个类簇的概念，详细内容可参考官方文档。简单的说，比如NSNumber，是OC的一个数据类型，并不是C的基本数据类型，而C的int、float、double、char、bool等都可以封装成NSNumber类型，也就是说NSNumber并不是单一的一种类型，是C中很多类型的统称，也叫类簇。OC的类簇不止是NSNumber，还有NSArray等等好多。
+   
+   而类簇包含的所有类型的字面量创建对象方式都是差不多的，如下：
+   NSNumber *number = @2.6;
+   NSNumber *number = @2.5f;
+   NSNumber *char = @'a';
+   
+   另外NSNumber还可以表示布尔类型，如下：
+   NSNumber *bool = @YES;
+   NSNumber *bool = @NO;
+   
+   说到布尔类型，OC和其他语言不太一样，详细内容可参考官方文档，只要记住YES和NO不能简单理解成1和0，!YES并不等于NO。
+   
+   NSNumber还可以通过表达式的方式创建，如下：
+   NSNumber *number = @(2 * 9);
+   
+插个题外话：初学iOS，OC内部的机理可以看一些推荐书籍和官方文档，但关于iOS项目，其实完全是另外一回事，可以参考手机上别人的app，哪怕是android的app，依葫芦画瓢，不用非得从一个新项目开始，能仿照别人的做出来也能学不少东西，而且效率、成本比较低。其实Effective OC主要讲的是如何提高代码质量，可以有空的时候慢慢学习。建议现在开始介入实际项目。
+   
+   
+   
+ 
